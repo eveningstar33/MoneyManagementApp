@@ -1,9 +1,40 @@
-// BUDGET CONTROLLER
+// BUDGET CONTROLLER 
 var budgetController = (function() {
 
-	 
-})();
+	// Create Expense and Income function constructors
 
+	var Expense = function(id, description, value) {
+		this.id = id;
+		this.description = description;
+		this.value = value;
+	};
+
+	var Income = function() {
+		this.id = id;
+		this.description = description;
+		this.value = value;
+	};
+
+	/*
+	  The budget constructor keeps track of all the incomes and expenses and also 
+	  of the budget and percentages. And we need a good data structure for that.
+	  For example if the user will input 15 incomes, we need to create 15 income
+	  objects, and we can store these 15 incomes into an array.
+	*/
+
+	var data = {
+		allItems: {
+			exp: [],
+			inc: []
+		},
+		totalItems: {
+			exp: 0,
+			inc: 0
+		}
+	};
+
+
+})();
 
 
 // UI CONTROLLER
