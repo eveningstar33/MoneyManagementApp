@@ -117,6 +117,31 @@ var UIController = (function() {
 			*/
 
 		},
+		clearFields: function() {
+			var fields, fieldsArr;
+			fields = document.querySelectorAll(DOMStrings.inputDescription + ', ' + 
+				DOMStrings.inputValue);
+
+			/*
+			The querySelectorAll method returns a static NodeList, which is a 
+			collection of nodes. Now, the fields variable does not contain an array. 
+			It actually contains a list that holds the two DOM objects inputDescription 
+			and inputValue. We can use the call method to pass this list into the slice 
+			method of the Array prototype, and it will return the list as an array.
+			*/
+
+			/*
+			Then we can use the array forEach method to loop through the list and 
+			change the value  property of each object to an empty string.
+			*/
+
+			fieldsArr = Array.prototype.slice.call(fields); 
+			fieldsArr.forEach(function(current) {
+				current.value = "";
+			});
+
+			fieldsArr[0].focus();
+		},
 		getDOMStrings: function() {
 			return DOMStrings;
 		}
@@ -156,9 +181,12 @@ var controller = (function(budgetCtrl, UICtrl) {
 		// 3. Add the item to the UI
 		UICtrl.addListItem(newItem, input.type); 
 
-		// 4. Calculate the budget
+		// 4. Clear the fields
+		UICtrl.clearFields();
 
-		// 5. Display the budget on the UI
+		// 5. Calculate the budget
+
+		// 6. Display the budget on the UI
 
 	};
 
