@@ -26,10 +26,27 @@ var budgetController = (function() {
 			exp: [],
 			inc: []
 		},
-		totalItems: {
+		totals: {
 			exp: 0,
 			inc: 0
-		}
+		},
+		budget: 0,
+		percentage: -1
+	};
+
+	/*
+	  We've set the percentage to -1 because -1 is actually a value that we use 
+	  to say that something is nonexistent. So if there are no budget values and 
+	  no total expenses and incomes, then there cannot be a percentage.
+	*/
+
+	var calculateTotal = function(type) {
+		var sum = 0;
+
+		data.allItems[type].forEach(function(cur) {
+			sum += cur.value;
+		});
+		data.totals[type] = sum;
 	};
 
 	return {
@@ -60,6 +77,36 @@ var budgetController = (function() {
 			// Return the new element
 			return newItem;
 		},
+		calculateBudget: function() {
+			// Calculate total income and expenses
+			calculateTotal('exp');
+			calculateTotal('inc');
+
+			// Calculate the budget: income - expenses
+			data.budget = data.totals.inc - data.totals.exp;
+
+			// Calculate the percentage of income that we spent
+			if (data.totals.inc > 0) {
+				data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100); 
+			} else {
+				data.percentage = -1;
+			}
+		},
+
+		/*
+		  We're creating this getBudget method only for returning something from this
+		   data structure or from the module to understand this philosophy of having 
+		  functions that only retrieve data, or functions that only set data.
+		*/
+
+		getBudget: function() {
+			return {
+				budget: data.budget,
+				totalInc: data.totals.inc,
+				totalExp: data.totals.exp,
+				percentage: data.percentage
+			};
+		},
 		testing: function() {
 			console.log(data);
 		}
@@ -86,7 +133,7 @@ var UIController = (function() {
 			return {
 				type: document.querySelector(DOMStrings.inputType).value,  // Will be either inc or exp
 				description: document.querySelector(DOMStrings.inputDescription).value,
-				value: document.querySelector(DOMStrings.inputValue).value
+				value: parseFloat(document.querySelector(DOMStrings.inputValue).value)
 			};
 		},
 		addListItem: function(obj, type) {
@@ -167,7 +214,19 @@ var controller = (function(budgetCtrl, UICtrl) {
 				ctrlAddItem();
 			}
 		});
-	}
+	};
+
+	var updateBudget = function() {
+
+		// 1. Calculate the budget
+		budgetCtrl.calculateBudget();
+
+		// 2. Return the budget
+		var budget = budgetCtrl.getBudget();
+
+		// 3. Display the budget on the UI
+		console.log(budget);
+	};
 
 	var ctrlAddItem = function() {
 		var input, newItem;
@@ -175,19 +234,19 @@ var controller = (function(budgetCtrl, UICtrl) {
 		// 1. Get the field input data
 		input = UICtrl.getInput();
 
-		// 2. Add the item to the budget controller
-		newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+		if ((input.description !== "") && !isNaN(input.value) && (input.value > 0)) {
+			// 2. Add the item to the budget controller
+			newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-		// 3. Add the item to the UI
-		UICtrl.addListItem(newItem, input.type); 
+			// 3. Add the item to the UI
+			UICtrl.addListItem(newItem, input.type); 
 
-		// 4. Clear the fields
-		UICtrl.clearFields();
+			// 4. Clear the fields
+			UICtrl.clearFields();
 
-		// 5. Calculate the budget
-
-		// 6. Display the budget on the UI
-
+			// 5. Calculate and update budget
+			updateBudget();
+		}
 	};
 
 	return {
