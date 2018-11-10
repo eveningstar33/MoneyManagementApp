@@ -129,7 +129,8 @@ var UIController = (function() {
 		budgetLabel: '.budget__value',
 		incomeLabel: '.budget__income--value',
 		expensesLabel: '.budget__expenses--value',
-		percentageLabel: '.budget__expenses--percentage'
+		percentageLabel: '.budget__expenses--percentage',
+		container: '.container'
 	};
 
 	return {
@@ -229,6 +230,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 				ctrlAddItem();
 			}
 		});
+		 
+		// Setting up the delete event listener using event delegation. 
+		document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
 	};
 
 	var updateBudget = function() {
@@ -263,6 +267,44 @@ var controller = (function(budgetCtrl, UICtrl) {
 			updateBudget();
 		}
 	};
+
+	/*
+	  We're using the event parameter because we want access to the event object. 
+	  And the reason why we need this event here is because we want to know what 
+	  the target element is. In event delegation, an event bubbles up and then 
+	  we can know where it came from, so where it was first fired, by looking at 
+	  the target property of the event. 
+	*/
+
+	var ctrlDeleteItem = function(event) {
+		var itemID, splitID, type, ID;
+
+		itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+		/*
+		  If we click somewhere else on the we get nothing in the console and 
+		  that's because there are no other ids in the whole HTML document. And 
+		  we will use this fact to say that we only want stuff to happen later
+		  if the id is actually defined. 
+		*/
+
+		if (itemID) {
+			/*
+			  JavaScript automatically puts a wrapper around the String and 
+			  convert it from a primitive to an object. And then this object
+			  has access to a lot of string methods. 
+			*/
+			splitID = itemID.split('-');
+			type = splitID[0];
+			ID = splitID[1];
+
+			// 1. Delete the item from the data structure
+
+			// 2. Delete the item from the UI
+
+			// 3. Update and show the new budget
+		}
+	}
 
 	return {
 		init: function() {
