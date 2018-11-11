@@ -6,6 +6,19 @@ var budgetController = (function() {
 		this.id = id;
 		this.description = description;
 		this.value = value;
+		this.percentage = -1;
+	};
+
+	Expense.prototype.calcPercentage = function(totalIncome) {
+		if (totalIncome > 0) {
+			this.percentage = Math.round((this.value / totalIncome) * 100); 
+		} else {
+			this.percentage = -1;
+		}
+	};
+
+	Expense.prototype.getPercentage = function() {
+		return this.percentage;
 	};
 
 	// Create Income function constructor
@@ -79,6 +92,7 @@ var budgetController = (function() {
 			// Return the new element
 			return newItem;
 		},
+
 		deleteItem: function(type, id) {
 			var ids, index;
 
@@ -100,6 +114,7 @@ var budgetController = (function() {
 			}
 			
 		},
+
 		calculateBudget: function() {
 			// Calculate total income and expenses
 			calculateTotal('exp');
@@ -116,6 +131,38 @@ var budgetController = (function() {
 			}
 		},
 
+		calculatePercentages: function() {
+			/*
+			  Expenses:
+			  a = 20
+			  b = 10
+			  c = 40
+			  Total income: 100
+			  Percentages:
+			  a = 20/100 = 20%
+			  b = 10/100 = 10%
+			  c = 40/100 = 40%
+			*/
+
+			data.allItems.exp.forEach(function(cur) {
+				cur.calcPercentage(data.totals.inc);
+			});
+		},
+
+		/*
+		  This time we don't want just loop over an array and do something, we also
+		  want to return something. We want to store it somewhere. And that's what
+		  the map method is for. So instead of forEach, we will use map because map
+		  returns something and stores it in a variable while forEach does not. 
+		*/
+
+		getPercentages: function() {
+			var allPercentages = data.allItems.exp.map(function(cur) {
+				return cur.getPercentage();
+			});
+			return allPercentages;
+		},
+
 		/*
 		  We're creating this getBudget method only for returning something from this
 		   data structure or from the module to understand this philosophy of having 
@@ -130,6 +177,7 @@ var budgetController = (function() {
 				percentage: data.percentage
 			};
 		},
+
 		testing: function() {
 			console.log(data);
 		}
@@ -274,6 +322,17 @@ var controller = (function(budgetCtrl, UICtrl) {
 		UICtrl.displayBudget(budget); 
 	};
 
+	var updatePercentages = function() {
+		// 1. Calculate percentages
+		budgetCtrl.calculatePercentages();
+
+		// 2. Read percentages from the budget controller
+		var percentages = budgetCtrl.getPercentages();
+
+		// 3. Update the UI with the new percentages
+		console.log(percentages);
+	}
+
 	var ctrlAddItem = function() {
 		var input, newItem;
 
@@ -292,6 +351,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
 			// 5. Calculate and update budget
 			updateBudget();
+
+			// 6. Calculate and update percentages
+			updatePercentages();
 		}
 	};
 
@@ -334,6 +396,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
 			// 3. Update and show the new budget
 			updateBudget();
+
+			// 4. Calculate and update percentages
+			updatePercentages();
 		}
 	};
 
