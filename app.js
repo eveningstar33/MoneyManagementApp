@@ -201,7 +201,8 @@ var UIController = (function() {
 		incomeLabel: '.budget__income--value',
 		expensesLabel: '.budget__expenses--value',
 		percentageLabel: '.budget__expenses--percentage',
-		container: '.container'
+		container: '.container',
+		expensesPercLabel: '.item__percentage'
 	};
 
 	return {
@@ -212,6 +213,7 @@ var UIController = (function() {
 				value: parseFloat(document.querySelector(DOMStrings.inputValue).value)
 			};
 		},
+
 		addListItem: function(obj, type) {
 			var html, element, newHtml;
 
@@ -240,10 +242,12 @@ var UIController = (function() {
 			*/
 
 		},
+
 		deleteListItem: function(itemID) {
 			var el = document.getElementById(itemID);
 			el.parentNode.removeChild(el);
 		},
+
 		clearFields: function() {
 			var fields, fieldsArr;
 			fields = document.querySelectorAll(DOMStrings.inputDescription + ', ' + 
@@ -269,6 +273,7 @@ var UIController = (function() {
 
 			fieldsArr[0].focus();
 		},
+
 		displayBudget: function(obj) {
 			document.querySelector(DOMStrings.budgetLabel).textContent = obj.budget;
 			document.querySelector(DOMStrings.incomeLabel).textContent = obj.totalInc;
@@ -280,6 +285,36 @@ var UIController = (function() {
 				document.querySelector(DOMStrings.percentageLabel).textContent = '---';
 			}
 		},
+
+		displayPercentages: function(percentages) {
+			var fields = document.querySelectorAll(DOMStrings.expensesPercLabel);
+			/*
+			  This will return a list and acltually is called a NodeList, not just
+			  list and that is because in the DOM tree, where all of the html 
+			  elements of our page are stored, each element is called a node. And 
+			  now we need to loop over all of these elements in our selection, all 
+			  of these nodes and then change the text content property for all of 
+			  them. The NodeList doesn't have the forEach method, it is for array.
+			  And we can convert the NodeList into an array using slice method. But 
+			  instead we can create our own forEach function but for NodeLists instead 
+			  of arrays.
+			*/
+
+			var nodeListForEach = function(list, callback) {
+				for (var i = 0; i < list.length; i++) {
+					callback(list[i], i);
+				}
+			};
+
+			nodeListForEach(fields, function(current, index) {
+				if (percentages[index] > 0) {
+					current.textContent = percentages[index] + '%';
+				} else {
+					current.textContent = '---';
+				}
+			});
+		},
+
 		getDOMStrings: function() {
 			return DOMStrings;
 		}
@@ -330,7 +365,7 @@ var controller = (function(budgetCtrl, UICtrl) {
 		var percentages = budgetCtrl.getPercentages();
 
 		// 3. Update the UI with the new percentages
-		console.log(percentages);
+		UICtrl.displayPercentages(percentages);
 	}
 
 	var ctrlAddItem = function() {
